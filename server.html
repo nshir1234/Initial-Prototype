@@ -41,6 +41,10 @@
   <div class="nav">
   <button onclick="location='server_orders.html'">View Server Orders</button>
   <button onclick="location='kitchen_ticket_detail.html'">View Kitchen Tickets</button>
+  <button id="goOrders">View Orders</button>
+  <button id="goOrderDetail">Order Detail</button>
+  <button id="goKitchenTickets">Kitchen Tickets</button>
+
   </div>
 
     <div class="panel right">
@@ -156,9 +160,14 @@
     }
 
     // navigation
-    $('goKitchen').addEventListener('click', ()=> window.location='kitchen.html');
-    $('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
-    $('submitOrder').addEventListener('click', submitTicket);
+$('goKitchen').addEventListener('click', ()=> window.location='kitchen.html');
+$('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
+$('submitOrder').addEventListener('click', submitTicket);
+
+$('goOrders').addEventListener('click', ()=> window.location='server_orders.html');
+$('goOrderDetail').addEventListener('click', ()=> window.location='server_order_detail.html');
+$('goKitchenTickets').addEventListener('click', ()=> window.location='kitchen_ticket_detail.html');
+
 
     // init
     renderMenu();
