@@ -7,47 +7,58 @@
 <style>
 body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.card { background:#fafafa; border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
-button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:8px; }
+.card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
 .small { font-size:0.9em; color:#666; }
+button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:6px; }
 </style>
 </head>
 <body>
 <header>
   <div>
-    <h2>Menu Viewer</h2>
+    <h2>Manager — Menu Viewer</h2>
     <div class="small" id="managerInfo"></div>
   </div>
   <div>
     <button id="editMenu">Edit Menu</button>
+    <button id="back">Back</button>
     <button id="logout">Logout</button>
   </div>
 </header>
-<div id="menuArea"></div>
+
+<div id="menuList"></div>
 
 <script>
-function $(id){return document.getElementById(id);}
-const user = JSON.parse(localStorage.getItem("currentUser")||"null");
-if(!user || user.role!=="manager"){ alert("Please sign in as Manager"); window.location="index.html"; }
-$("managerInfo").innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+function $(id){ return document.getElementById(id); }
 
-function getMenu(){ return JSON.parse(localStorage.getItem("menu")||'[]'); }
+// enforce manager login
+const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if(!user || user.role !== 'manager'){
+  alert('Please sign in as Manager');
+  window.location='index.html';
+}
+$('managerInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+
+// load menu from localStorage
+function getMenu(){ 
+  return JSON.parse(localStorage.getItem('MENU') || '[]'); 
+}
+
 function renderMenu(){
-  const menu = getMenu();
-  const area = $("menuArea");
-  area.innerHTML = "";
-  if(menu.length===0) area.innerHTML="<div class='small'>No menu items available.</div>";
-  menu.forEach(it=>{
-    const div = document.createElement("div"); div.className="card";
-    div.innerHTML = `<strong>${it.name}</strong> - $${it.price.toFixed(2)}
-                     <div class="small">Modifiers: ${it.modifiers.join(", ") || "-"}</div>`;
-    area.appendChild(div);
+  const container = $('menuList');
+  container.innerHTML = '';
+  getMenu().forEach(it=>{
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `<strong>${it.name}</strong> - $${it.price.toFixed(2)}<div class="small">Modifiers: ${it.modifiers.join(', ')}</div>`;
+    container.appendChild(div);
   });
 }
 
-$("editMenu").addEventListener("click", ()=> window.location="menu_edit.html");
-$("logout").addEventListener("click", ()=> { localStorage.removeItem("currentUser"); window.location="index.html"; });
+$('editMenu').addEventListener('click', ()=>window.location='edit_menu.html');
+$('back').addEventListener('click', ()=>window.location='index.html');
+$('logout').addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
 
+// initial render
 renderMenu();
 </script>
 </body>
