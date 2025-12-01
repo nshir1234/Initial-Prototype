@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Server — Order Detail</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
+    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+    .small { font-size:0.9em; color:#666; }
+    button { padding:8px 10px; border-radius:6px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h2>Order Detail</h2>
+      <div class="small" id="serverInfo"></div>
+    </div>
+    <div>
+      <button id="openKitchen">Open Kitchen Board</button>
+      <button id="logout">Logout</button>
+    </div>
+  </header>
+
+  <div class="card" id="detailCard">Loading...</div>
+
+  <script>
+    function $(id){ return document.getElementById(id); }
+    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if(!user || user.role !== 'server'){ alert('Please sign in as Server'); window.location = 'index.html'; }
+    $('serverInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    function loadTickets(){ return JSON.parse(localStorage.getItem('tickets') || '[]'); }
+    function findTicket(id){
+      const tickets = loadTickets();
+      return tickets.find(t => t.id === id);
+    }
+
+    const ticket = findTicket(id);
+    if(!ticket){
+      $('detailCard').innerHTML = '<div class="small">Ticket not found.</div>';
+    } else {
+      const itemsHtml = ticket.items.map(it => `<div>${it.qty} × ${it.name} ${it.modifiers && it.modifiers.length ? '<div class="small">Modifiers: '+it.modifiers.join(', ') +'</div>' : ''}</div>`).join('');
+      $('detailCard').innerHTML = `
+        <b>Table:</b> ${ticket.tableNumber} <div class="small">Submitted: ${new Date(ticket.createdAt).toLocaleString()}</div>
+        <hr>
+        <b>Items:</b><br>${itemsHtml}
+        <hr>
+        <b>Note:</b> ${ticket.note || '-'}<br>
+        <b>Status:</b> ${ticket.status}
+      `;
+    }
+
+    $('openKitchen').addEventListener('click', ()=> window.location='kitchen.html');
+    $('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
+  </script>
+</body>
+</html>
