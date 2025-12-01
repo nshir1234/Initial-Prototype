@@ -35,6 +35,16 @@ $("managerInfo").innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 function getMenu(){ return JSON.parse(localStorage.getItem("menu")||'[]'); }
 function saveMenu(menu){ localStorage.setItem("menu", JSON.stringify(menu)); }
 
+// Initialize menu if empty
+if(getMenu().length===0){
+  localStorage.setItem("menu", JSON.stringify([
+    {id:"m1", name:"Caesar Salad", price:8.5, modifiers:["No Dressing","Extra Dressing"]},
+    {id:"m2", name:"Cheeseburger", price:11, modifiers:["Well-Done","No Onions","Add Bacon"]},
+    {id:"m3", name:"Margherita Pizza", price:12.5, modifiers:["Extra Cheese","No Basil","Gluten-Free"]},
+    {id:"m4", name:"Fries", price:4, modifiers:["No Salt","Extra Crispy"]}
+  ]));
+}
+
 function renderMenu(){
   const menu = getMenu();
   const area = $("menuArea");
@@ -49,23 +59,18 @@ function renderMenu(){
     `;
     area.appendChild(div);
     document.getElementById(`save${idx}`).addEventListener("click", ()=>{
-      menu[idx].name = $("name"+idx).value;
-      menu[idx].price = parseFloat($("price"+idx).value) || 0;
-      menu[idx].modifiers = $("mods"+idx).value.split(",").map(s=>s.trim()).filter(Boolean);
-      saveMenu(menu);
+      // update menu item safely
+      const updatedMenu = getMenu();
+      updatedMenu[idx] = {
+        id: updatedMenu[idx].id, // preserve id
+        name: $("name"+idx).value.trim() || updatedMenu[idx].name,
+        price: parseFloat($("price"+idx).value) || updatedMenu[idx].price,
+        modifiers: $("mods"+idx).value.split(",").map(s=>s.trim()).filter(Boolean)
+      };
+      saveMenu(updatedMenu);
       alert("Menu updated!");
     });
   });
-}
-
-// optional: create empty menu if none exists
-if(getMenu().length===0){
-  localStorage.setItem("menu", JSON.stringify([
-    {id:"m1", name:"Caesar Salad", price:8.5, modifiers:["No Dressing","Extra Dressing"]},
-    {id:"m2", name:"Cheeseburger", price:11, modifiers:["Well-Done","No Onions","Add Bacon"]},
-    {id:"m3", name:"Margherita Pizza", price:12.5, modifiers:["Extra Cheese","No Basil","Gluten-Free"]},
-    {id:"m4", name:"Fries", price:4, modifiers:["No Salt","Extra Crispy"]}
-  ]));
 }
 
 renderMenu();
