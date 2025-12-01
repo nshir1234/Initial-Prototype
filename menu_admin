@@ -7,16 +7,16 @@
 <style>
 body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.card { background:#fafafa; border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
-button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:8px; }
+.card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
 .small { font-size:0.9em; color:#666; }
-input { padding:6px; width:80%; margin-top:4px; }
+button { padding:6px 8px; border-radius:6px; cursor:pointer; margin-right:6px; }
+input { padding:6px; width:100px; margin-right:6px; }
 </style>
 </head>
 <body>
 <header>
   <div>
-    <h2>Edit Menu</h2>
+    <h2>Manager — Edit Menu</h2>
     <div class="small" id="managerInfo"></div>
   </div>
   <div>
@@ -24,59 +24,54 @@ input { padding:6px; width:80%; margin-top:4px; }
     <button id="logout">Logout</button>
   </div>
 </header>
-<div id="menuArea"></div>
+
+<div id="menuEditList"></div>
 
 <script>
-function $(id){return document.getElementById(id);}
-const user = JSON.parse(localStorage.getItem("currentUser")||"null");
-if(!user || user.role!=="manager"){ alert("Please sign in as Manager"); window.location="index.html"; }
-$("managerInfo").innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+function $(id){ return document.getElementById(id); }
 
-function getMenu(){ return JSON.parse(localStorage.getItem("menu")||'[]'); }
-function saveMenu(menu){ localStorage.setItem("menu", JSON.stringify(menu)); }
-
-// Initialize menu if empty
-if(getMenu().length===0){
-  localStorage.setItem("menu", JSON.stringify([
-    {id:"m1", name:"Caesar Salad", price:8.5, modifiers:["No Dressing","Extra Dressing"]},
-    {id:"m2", name:"Cheeseburger", price:11, modifiers:["Well-Done","No Onions","Add Bacon"]},
-    {id:"m3", name:"Margherita Pizza", price:12.5, modifiers:["Extra Cheese","No Basil","Gluten-Free"]},
-    {id:"m4", name:"Fries", price:4, modifiers:["No Salt","Extra Crispy"]}
-  ]));
+// enforce manager login
+const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if(!user || user.role !== 'manager'){
+  alert('Please sign in as Manager');
+  window.location='index.html';
 }
+$('managerInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-function renderMenu(){
-  const menu = getMenu();
-  const area = $("menuArea");
-  area.innerHTML="";
-  menu.forEach((it, idx)=>{
-    const div = document.createElement("div"); div.className="card";
+// load/save menu
+function getMenu(){ return JSON.parse(localStorage.getItem('MENU') || '[]'); }
+function saveMenu(menu){ localStorage.setItem('MENU', JSON.stringify(menu)); }
+
+function renderMenuEditor(){
+  const container = $('menuEditList');
+  container.innerHTML = '';
+  getMenu().forEach((it, idx)=>{
+    const div = document.createElement('div');
+    div.className='card';
     div.innerHTML = `
-      <label>Name: <input type="text" id="name${idx}" value="${it.name}"></label><br>
-      <label>Price: <input type="number" step="0.01" id="price${idx}" value="${it.price}"></label><br>
-      <label>Modifiers (comma separated): <input type="text" id="mods${idx}" value="${it.modifiers.join(", ")}"></label><br>
-      <button id="save${idx}">Save</button>
+      <strong>${it.name}</strong><br>
+      Price: $<input type="number" step="0.01" value="${it.price}" id="price_${idx}" /> <br>
+      Modifiers: <input type="text" value="${it.modifiers.join(', ')}" id="mods_${idx}" /><br>
+      <button id="save_${idx}">Save</button>
     `;
-    area.appendChild(div);
-    document.getElementById(`save${idx}`).addEventListener("click", ()=>{
-      // update menu item safely
-      const updatedMenu = getMenu();
-      updatedMenu[idx] = {
-        id: updatedMenu[idx].id, // preserve id
-        name: $("name"+idx).value.trim() || updatedMenu[idx].name,
-        price: parseFloat($("price"+idx).value) || updatedMenu[idx].price,
-        modifiers: $("mods"+idx).value.split(",").map(s=>s.trim()).filter(Boolean)
-      };
-      saveMenu(updatedMenu);
-      alert("Menu updated!");
+    container.appendChild(div);
+    $(`save_${idx}`).addEventListener('click', ()=>{
+      const newPrice = parseFloat($(`price_${idx}`).value);
+      const newMods = $(`mods_${idx}`).value.split(',').map(s=>s.trim()).filter(Boolean);
+      if(isNaN(newPrice) || newPrice<0){ alert('Invalid price'); return; }
+      const menu = getMenu();
+      menu[idx].price = newPrice;
+      menu[idx].modifiers = newMods;
+      saveMenu(menu);
+      alert(`${menu[idx].name} updated.`);
     });
   });
 }
 
-renderMenu();
+$('back').addEventListener('click', ()=>window.location='menu.html');
+$('logout').addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
 
-$("back").addEventListener("click", ()=> window.location="menu.html");
-$("logout").addEventListener("click", ()=> { localStorage.removeItem("currentUser"); window.location="index.html"; });
+renderMenuEditor();
 </script>
 </body>
 </html>
