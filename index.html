@@ -1,51 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Demo — Restaurant Ordering (Sprint 1)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; display:flex; min-height:100vh; align-items:center; justify-content:center; background:#f4f4f6; }
-    .card { background:white; padding:24px; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.06); width:340px; text-align:center; }
-    button { padding:10px 14px; margin:8px; border-radius:6px; border:1px solid #ccc; cursor:pointer; }
-    input { padding:8px; width:100%; margin-top:10px; box-sizing:border-box; }
-  </style>
+<meta charset="utf-8" />
+<title>Demo — Restaurant Ordering</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body { font-family: Arial, sans-serif; display:flex; min-height:100vh; align-items:center; justify-content:center; background:#f4f4f6; }
+  .card { background:white; padding:24px; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.06); width:340px; text-align:center; }
+  button { padding:10px 14px; margin:8px; border-radius:6px; border:1px solid #ccc; cursor:pointer; }
+  input { padding:8px; width:100%; margin-top:10px; box-sizing:border-box; }
+</style>
 </head>
 <body>
   <div class="card">
     <h2>Restaurant Ordering — Demo</h2>
     <p>Choose a role to start (demo).</p>
-    <label>
-      <input id="name" placeholder="Enter your name" />
-    </label>
+    <label><input id="name" placeholder="Enter your name" /></label>
     <div style="margin-top:12px">
       <button id="serverBtn">Sign in as Server</button>
       <button id="kitchenBtn">Sign in as Kitchen</button>
-      <button id="managerBtn">Sign in as Manager</button>
+      <button id="managerBtn">Manager</button>
     </div>
     <p style="font-size:0.85em;color:#666;margin-top:12px;">This demo saves tickets locally in your browser.</p>
   </div>
 
-  <script>
-    const nameInput = document.getElementById('name');
+<script>
+const nameInput = document.getElementById('name');
 
-    document.getElementById('serverBtn').addEventListener('click', () => {
-      const n = nameInput.value.trim() || 'Server';
-      localStorage.setItem('currentUser', JSON.stringify({ role:'server', name: n }));
-      window.location = 'server.html';
-    });
+document.getElementById('serverBtn').addEventListener('click', () => {
+  const n = nameInput.value.trim() || 'Server';
+  localStorage.setItem('currentUser', JSON.stringify({ role:'server', name: n }));
+  window.location = 'server.html';
+});
 
-    document.getElementById('kitchenBtn').addEventListener('click', () => {
-      const n = nameInput.value.trim() || 'Kitchen';
-      localStorage.setItem('currentUser', JSON.stringify({ role:'kitchen', name: n }));
-      window.location = 'kitchen.html';
-    });
+document.getElementById('kitchenBtn').addEventListener('click', () => {
+  const n = nameInput.value.trim() || 'Kitchen';
+  localStorage.setItem('currentUser', JSON.stringify({ role:'kitchen', name: n }));
+  window.location = 'kitchen.html';
+});
 
-    document.getElementById('managerBtn').addEventListener('click', () => {
-      const n = nameInput.value.trim() || 'Manager';
-      localStorage.setItem('currentUser', JSON.stringify({ role:'manager', name: n }));
-      window.location = 'menu.html';
-    });
-  </script>
+document.getElementById('managerBtn').addEventListener('click', () => {
+  const n = nameInput.value.trim() || 'Manager';
+  localStorage.setItem('currentUser', JSON.stringify({ role:'manager', name: n }));
+  window.location = 'menu.html';
+});
+</script>
 </body>
 </html>
