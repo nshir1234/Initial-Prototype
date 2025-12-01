@@ -2,63 +2,54 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Manager — Menu Viewer</title>
+<title>Menu Viewer</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
+body { font-family: Arial, padding:14px; background:#fff; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
 .small { font-size:0.9em; color:#666; }
-button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:6px; }
+button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-left:6px; }
 </style>
 </head>
 <body>
 <header>
+  <div><h2>Menu Viewer</h2><div class="small" id="managerInfo"></div></div>
   <div>
-    <h2>Manager — Menu Viewer</h2>
-    <div class="small" id="managerInfo"></div>
-  </div>
-  <div>
-    <button id="editMenu">Edit Menu</button>
     <button id="back">Back</button>
     <button id="logout">Logout</button>
   </div>
 </header>
 
-<div id="menuList"></div>
+<div id="menuArea"></div>
 
 <script>
 function $(id){ return document.getElementById(id); }
 
-// enforce manager login
 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
-if(!user || user.role !== 'manager'){
-  alert('Please sign in as Manager');
-  window.location='index.html';
-}
+if(!user || user.role!=='manager'){ alert('Sign in as Manager'); window.location='index.html'; }
 $('managerInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-// load menu from localStorage
-function getMenu(){ 
-  return JSON.parse(localStorage.getItem('MENU') || '[]'); 
-}
+function getMenu(){ return JSON.parse(localStorage.getItem('MENU')||'[]'); }
 
 function renderMenu(){
-  const container = $('menuList');
-  container.innerHTML = '';
+  const area = $('menuArea');
+  area.innerHTML='';
   getMenu().forEach(it=>{
     const div = document.createElement('div');
     div.className='card';
-    div.innerHTML = `<strong>${it.name}</strong> - $${it.price.toFixed(2)}<div class="small">Modifiers: ${it.modifiers.join(', ')}</div>`;
-    container.appendChild(div);
+    div.innerHTML=`<strong>${it.name}</strong> - $${it.price.toFixed(2)}<br><span class="small">Modifiers: ${it.modifiers.join(', ')}</span>`;
+    const editBtn = document.createElement('button');
+    editBtn.innerText='Edit';
+    editBtn.onclick=()=> window.location=`menu_admin.html?id=${it.id}`;
+    div.appendChild(editBtn);
+    area.appendChild(div);
   });
 }
 
-$('editMenu').addEventListener('click', ()=>window.location='edit_menu.html');
-$('back').addEventListener('click', ()=>window.location='index.html');
-$('logout').addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
+$('back').addEventListener('click', ()=> window.location='index.html');
+$('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
 
-// initial render
 renderMenu();
 </script>
 </body>
