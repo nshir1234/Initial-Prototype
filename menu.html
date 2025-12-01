@@ -1,46 +1,70 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Menu</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
+<meta charset="utf-8" />
+<title>Admin — Menu Editor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-body { font-family: Arial; padding: 20px; text-align:center; }
-button { padding:10px; margin:6px; font-size:16px; }
-.card { border:1px solid #ccc; padding:15px; border-radius:8px; margin:10px; }
+body { font-family: Arial, padding:14px; background:#fff; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
+.small { font-size:0.9em; color:#666; }
+button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:8px; }
+input[type="text"], input[type="number"]{ padding:6px; width:100%; margin-top:4px; box-sizing:border-box; }
 </style>
-
 </head>
 <body>
+<header>
+  <div>
+    <h2>Menu Editor</h2>
+    <div class="small" id="adminInfo"></div>
+  </div>
+  <div>
+    <button id="back">Back</button>
+    <button id="logout">Logout</button>
+  </div>
+</header>
 
-<h2>Menu</h2>
-
-<div id="menuArea" class="card">
-  <p>Sample Menu Item</p>
-  <p>$9.99</p>
-</div>
-
-<button id="goAdmin">Edit Menu</button>
-<br><br>
-
-<button id="goBack">Back</button>
-<button id="logout">Logout</button>
+<div id="menuArea"></div>
 
 <script>
-document.getElementById("goAdmin").addEventListener("click", () => {
-  window.location = "menu_admin.html";
-});
+function $(id){ return document.getElementById(id); }
 
-document.getElementById("goBack").addEventListener("click", () => {
-  window.location = "index.html";
-});
+const user = JSON.parse(localStorage.getItem('currentUser')||'null');
+if(!user){ alert('Please login'); window.location='index.html'; }
+$('adminInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-document.getElementById("logout").addEventListener("click", () => {
-  localStorage.removeItem("currentUser");
-  window.location = "index.html";
-});
+function getMenu(){ return JSON.parse(localStorage.getItem('MENU')||'[]'); }
+function saveMenu(menu){ localStorage.setItem('MENU', JSON.stringify(menu)); }
+
+function renderMenu(){
+  const area = $('menuArea');
+  area.innerHTML='';
+  getMenu().forEach((it, idx)=>{
+    const div = document.createElement('div'); div.className='card';
+    div.innerHTML = `
+      <label>Name: <input type="text" value="${it.name}" id="name${idx}"></label>
+      <label>Price: <input type="number" step="0.01" value="${it.price}" id="price${idx}"></label>
+      <label>Modifiers (comma separated): <input type="text" value="${it.modifiers.join(', ')}" id="mods${idx}"></label>
+      <button id="save${idx}">Save</button>
+    `;
+    area.appendChild(div);
+    document.getElementById(`save${idx}`).addEventListener('click', ()=>{
+      it.name = document.getElementById(`name${idx}`).value;
+      it.price = parseFloat(document.getElementById(`price${idx}`).value) || 0;
+      it.modifiers = document.getElementById(`mods${idx}`).value.split(',').map(s=>s.trim()).filter(Boolean);
+      saveMenu(getMenu());
+      alert('Menu updated!');
+    });
+  });
+}
+
+// navigation
+$('back').addEventListener('click',()=>window.location='server.html');
+$('logout').addEventListener('click',()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
+
+// init
+renderMenu();
 </script>
-
 </body>
 </html>
