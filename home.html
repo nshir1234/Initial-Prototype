@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Home Redirect</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script>
+    // If user came with ?role=... keep old behavior, otherwise route by currentUser
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      if(role === 'server'){ window.location = 'server.html'; return; }
+      if(role === 'kitchen'){ window.location = 'kitchen.html'; return; }
+
+      // Otherwise use currentUser if present
+      const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+      if(user && user.role === 'server') window.location = 'server.html';
+      else if(user && user.role === 'kitchen') window.location = 'kitchen.html';
+      else window.location = 'index.html';
+    }
+  </script>
+</head>
+<body></body>
+</html>
