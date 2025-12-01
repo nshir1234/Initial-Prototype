@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Admin Menu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+body { font-family: Arial; padding: 20px; text-align:center; }
+button { padding:10px; margin:6px; font-size:16px; }
+input { padding:8px; margin:6px; width:200px; }
+.card { border:1px solid #ccc; padding:15px; border-radius:8px; margin:10px; }
+</style>
+
+</head>
+<body>
+
+<h2>Edit Menu</h2>
+
+<div class="card">
+  <input id="menuName" placeholder="Item Name">
+  <br>
+  <input id="menuPrice" placeholder="Price">
+  <br>
+  <button id="saveMenu">Save</button>
+</div>
+
+<button id="goBack">Back</button>
+<button id="logout">Logout</button>
+
+<script>
+document.getElementById("saveMenu").addEventListener("click", () => {
+  alert("Menu Item Updated!");
+});
+
+// go back to menu
+document.getElementById("goBack").addEventListener("click", () => {
+  window.location = "menu.html";
+});
+
+// logout
+document.getElementById("logout").addEventListener("click", () => {
+  localStorage.removeItem("currentUser");
+  window.location = "index.html";
+});
+</script>
+
+</body>
+</html>
