@@ -1,80 +1,82 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Server — Your Orders</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
-    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-    .card { background:#fafafa; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
-    .small { font-size:0.9em; color:#666; }
-    a.button { display:inline-block; padding:8px 12px; border-radius:6px; background:#007bff; color:white; text-decoration:none; margin-right:8px; }
-  </style>
+<meta charset="utf-8" />
+<title>Server — Your Orders</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
+  header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+  .card { background:#fafafa; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+  .small { font-size:0.9em; color:#666; }
+  a.button { display:inline-block; padding:8px 12px; border-radius:6px; background:#007bff; color:white; text-decoration:none; margin-right:8px; }
+</style>
 </head>
 <body>
-  <header>
-    <div>
-      <h2>Your Orders</h2>
-      <div class="small" id="serverInfo"></div>
-    </div>
-    <div>
-      <a class="button" href="server.html">Order Entry</a>
-      <a class="button" id="goKitchen" href="kitchen.html">Open Kitchen</a>
-      <button id="logout" style="padding:8px 12px;border-radius:6px;">Logout</button>
-    </div>
-  </header>
 
-  <div id="listArea"></div>
+<header>
+  <div>
+    <h2>Your Orders</h2>
+    <div class="small" id="serverInfo"></div>
+  </div>
 
-  <script>
-    function $(id){ return document.getElementById(id); }
+  <div>
+    <a class="button" href="server.html">Order Entry</a>
+    <a class="button" id="goKitchen" href="kitchen.html">Open Kitchen</a>
+    <button id="logout" style="padding:8px 12px;border-radius:6px;">Logout</button>
+  </div>
+</header>
 
-    // Role enforcement
-    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
-    if(!user || user.role !== 'server'){ alert('Please sign in as Server'); window.location = 'index.html'; }
-    $('serverInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+<div id="listArea"></div>
 
-    // seed sample data if empty (keeps consistent ticket structure)
-    function seedIfEmpty(){
-      const existing = JSON.parse(localStorage.getItem('tickets') || '[]');
-      if(existing.length === 0){
-        const sample = [
-          { id:'t_' + (Date.now()-60000), tableNumber:4, serverName:user.name, items:[{qty:1,name:'Caesar Salad'}], note:'No croutons', status:'New', createdAt: new Date(Date.now()-60000).toISOString() },
-          { id:'t_' + (Date.now()-30000), tableNumber:7, serverName:user.name, items:[{qty:2,name:'Fries'}], note:'Extra salt', status:'In Progress', createdAt: new Date(Date.now()-30000).toISOString() }
-        ];
-        localStorage.setItem('tickets', JSON.stringify(sample));
-      }
-    }
+<script>
+function $(id){ return document.getElementById(id); }
 
-    seedIfEmpty();
+// Role enforcement
+const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+if(!user || user.role !== 'server'){
+  alert('Please sign in as Server');
+  window.location = 'index.html';
+}
 
-    function loadTickets(){
-      return JSON.parse(localStorage.getItem('tickets') || '[]').sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
-    }
+$('serverInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-    function render(){
-      const tickets = loadTickets().filter(t => t.serverName === user.name);
-      const area = $('listArea');
-      area.innerHTML = '';
-      if(tickets.length === 0){
-        area.innerHTML = '<div class="card"><div class="small">No orders found. Create one on the Order Entry page.</div></div>';
-        return;
-      }
-      tickets.forEach(t=>{
-        const div = document.createElement('div'); div.className='card';
-        div.innerHTML = `<strong>Table ${t.tableNumber}</strong> <div class="small">Submitted ${new Date(t.createdAt).toLocaleString()}</div>
-          <div style="margin-top:8px;"><b>Status:</b> ${t.status}</div>
-          <div style="margin-top:8px;">
-            <a class="button" href="server_order_detail.html?id=${t.id}">View Details</a>
-          </div>`;
-        area.appendChild(div);
-      });
-    }
+// load
+function loadTickets(){
+  return JSON.parse(localStorage.getItem('tickets') || '[]')
+    .sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+}
 
-    $('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
+function render(){
+  const tickets = loadTickets().filter(t => t.serverName === user.name);
+  const area = $('listArea');
+  area.innerHTML = '';
 
-    render();
-  </script>
+  if(tickets.length === 0){
+    area.innerHTML = '<div class="card"><div class="small">No orders found. Create one on the Order Entry page.</div></div>';
+    return;
+  }
+
+  tickets.forEach(t=>{
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <strong>Table ${t.tableNumber}</strong>
+      <div class="small">${new Date(t.createdAt).toLocaleString()}</div>
+      <div class="small" style="margin:6px 0;">Status: ${t.status}</div>
+      <a class="button" href="server_order_detail.html?id=${t.id}">View</a>
+    `;
+    area.appendChild(div);
+  });
+}
+
+$('logout').addEventListener('click', ()=>{
+  localStorage.removeItem('currentUser');
+  window.location='index.html';
+});
+
+render();
+</script>
+
 </body>
 </html>
