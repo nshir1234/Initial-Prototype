@@ -21,30 +21,31 @@
     <div style="margin-top:12px">
       <button id="serverBtn">Sign in as Server</button>
       <button id="kitchenBtn">Sign in as Kitchen</button>
-      <button id="managerBtn">Manager Login</button>
-
+      <button id="managerBtn">Sign in as Manager</button>
     </div>
     <p style="font-size:0.85em;color:#666;margin-top:12px;">This demo saves tickets locally in your browser.</p>
   </div>
 
   <script>
     const nameInput = document.getElementById('name');
+
     document.getElementById('serverBtn').addEventListener('click', () => {
       const n = nameInput.value.trim() || 'Server';
       localStorage.setItem('currentUser', JSON.stringify({ role:'server', name: n }));
       window.location = 'server.html';
     });
+
     document.getElementById('kitchenBtn').addEventListener('click', () => {
       const n = nameInput.value.trim() || 'Kitchen';
       localStorage.setItem('currentUser', JSON.stringify({ role:'kitchen', name: n }));
       window.location = 'kitchen.html';
     });
-    document.getElementById("managerBtn").addEventListener("click", () => {
-  const n = nameInput.value.trim() || "Manager";
-  localStorage.setItem("currentUser", JSON.stringify({ role: "manager", name: n }));
-  window.location = "menu.html";
-});
 
+    document.getElementById('managerBtn').addEventListener('click', () => {
+      const n = nameInput.value.trim() || 'Manager';
+      localStorage.setItem('currentUser', JSON.stringify({ role:'manager', name: n }));
+      window.location = 'menu.html';
+    });
   </script>
 </body>
 </html>
