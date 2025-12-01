@@ -21,6 +21,7 @@
     <div style="margin-top:12px">
       <button id="serverBtn">Sign in as Server</button>
       <button id="kitchenBtn">Sign in as Kitchen</button>
+      <button id="goMenu">Menu Viewer</button>
     </div>
     <p style="font-size:0.85em;color:#666;margin-top:12px;">This demo saves tickets locally in your browser.</p>
   </div>
@@ -36,6 +37,8 @@
       const n = nameInput.value.trim() || 'Kitchen';
       localStorage.setItem('currentUser', JSON.stringify({ role:'kitchen', name: n }));
       window.location = 'kitchen.html';
+    document.getElementById("goMenu").addEventListener("click", () => {
+      window.location = "menu.html";
     });
   </script>
 </body>
