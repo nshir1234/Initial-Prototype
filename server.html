@@ -76,8 +76,21 @@ if(!localStorage.getItem('MENU')){
   localStorage.setItem('MENU', JSON.stringify(defaultMenu));
 }
 
-function getMenu(){ return JSON.parse(localStorage.getItem('MENU')); }
-const state = { orderItems: [] };
+// unified menu storage
+function getMenu() { 
+  return JSON.parse(localStorage.getItem('menu') || '[]'); 
+}
+
+// if menu is empty, initialize default
+if(!localStorage.getItem('menu') || getMenu().length === 0){
+  const defaultMenu = [
+    { id:'m1', name:'Caesar Salad', price:8.50, modifiers:['No Dressing','Extra Dressing'] },
+    { id:'m2', name:'Cheeseburger', price:11.00, modifiers:['Well-Done','No Onions','Add Bacon'] },
+    { id:'m3', name:'Margherita Pizza', price:12.50, modifiers:['Extra Cheese','No Basil','Gluten-Free'] },
+    { id:'m4', name:'Fries', price:4.0, modifiers:['No Salt','Extra Crispy'] }
+  ];
+  localStorage.setItem('menu', JSON.stringify(defaultMenu));
+}
 
 // render menu list
 function renderMenu(){
@@ -98,6 +111,7 @@ function renderMenu(){
     container.appendChild(div);
   });
 }
+
 
 // render order
 function renderOrder(){
