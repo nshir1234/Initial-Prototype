@@ -1,49 +1,77 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Admin Menu</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
+<meta charset="utf-8" />
+<title>Manager — Edit Menu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-body { font-family: Arial; padding: 20px; text-align:center; }
-button { padding:10px; margin:6px; font-size:16px; }
-input { padding:8px; margin:6px; width:200px; }
-.card { border:1px solid #ccc; padding:15px; border-radius:8px; margin:10px; }
+body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.card { background:#fafafa; border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:8px; }
+.small { font-size:0.9em; color:#666; }
+input { padding:6px; width:80%; margin-top:4px; }
 </style>
-
 </head>
 <body>
-
-<h2>Edit Menu</h2>
-
-<div class="card">
-  <input id="menuName" placeholder="Item Name">
-  <br>
-  <input id="menuPrice" placeholder="Price">
-  <br>
-  <button id="saveMenu">Save</button>
-</div>
-
-<button id="goBack">Back</button>
-<button id="logout">Logout</button>
+<header>
+  <div>
+    <h2>Edit Menu</h2>
+    <div class="small" id="managerInfo"></div>
+  </div>
+  <div>
+    <button id="back">Back</button>
+    <button id="logout">Logout</button>
+  </div>
+</header>
+<div id="menuArea"></div>
 
 <script>
-document.getElementById("saveMenu").addEventListener("click", () => {
-  alert("Menu Item Updated!");
-});
+function $(id){return document.getElementById(id);}
+const user = JSON.parse(localStorage.getItem("currentUser")||"null");
+if(!user || user.role!=="manager"){ alert("Please sign in as Manager"); window.location="index.html"; }
+$("managerInfo").innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-// go back to menu
-document.getElementById("goBack").addEventListener("click", () => {
-  window.location = "menu.html";
-});
+function getMenu(){ return JSON.parse(localStorage.getItem("menu")||'[]'); }
+function saveMenu(menu){ localStorage.setItem("menu", JSON.stringify(menu)); }
 
-// logout
-document.getElementById("logout").addEventListener("click", () => {
-  localStorage.removeItem("currentUser");
-  window.location = "index.html";
-});
+function renderMenu(){
+  const menu = getMenu();
+  const area = $("menuArea");
+  area.innerHTML="";
+  menu.forEach((it, idx)=>{
+    const div = document.createElement("div"); div.className="card";
+    div.innerHTML = `
+      <label>Name: <input type="text" id="name${idx}" value="${it.name}"></label><br>
+      <label>Price: <input type="number" step="0.01" id="price${idx}" value="${it.price}"></label><br>
+      <label>Modifiers (comma separated): <input type="text" id="mods${idx}" value="${it.modifiers.join(", ")}"></label><br>
+      <button id="save${idx}">Save</button>
+    `;
+    area.appendChild(div);
+    document.getElementById(`save${idx}`).addEventListener("click", ()=>{
+      menu[idx].name = $("name"+idx).value;
+      menu[idx].price = parseFloat($("price"+idx).value) || 0;
+      menu[idx].modifiers = $("mods"+idx).value.split(",").map(s=>s.trim()).filter(Boolean);
+      saveMenu(menu);
+      alert("Menu updated!");
+    });
+  });
+}
+
+// optional: create empty menu if none exists
+if(getMenu().length===0){
+  localStorage.setItem("menu", JSON.stringify([
+    {id:"m1", name:"Caesar Salad", price:8.5, modifiers:["No Dressing","Extra Dressing"]},
+    {id:"m2", name:"Cheeseburger", price:11, modifiers:["Well-Done","No Onions","Add Bacon"]},
+    {id:"m3", name:"Margherita Pizza", price:12.5, modifiers:["Extra Cheese","No Basil","Gluten-Free"]},
+    {id:"m4", name:"Fries", price:4, modifiers:["No Salt","Extra Crispy"]}
+  ]));
+}
+
+renderMenu();
+
+$("back").addEventListener("click", ()=> window.location="menu.html");
+$("logout").addEventListener("click", ()=> { localStorage.removeItem("currentUser"); window.location="index.html"; });
 </script>
-
 </body>
 </html>
