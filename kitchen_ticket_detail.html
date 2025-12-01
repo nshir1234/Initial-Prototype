@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Kitchen — Ticket Detail</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: Arial, padding:14px; background:#fff; }
+    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+    .card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+    .small { font-size:0.9em; color:#666; }
+    button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h2>Kitchen — Ticket Detail</h2>
+      <div class="small" id="kitchenInfo"></div>
+    </div>
+    <div>
+      <button id="back">Back to Board</button>
+      <button id="logout">Logout</button>
+    </div>
+  </header>
+
+  <div class="card" id="detailArea">Loading...</div>
+
+  <script>
+    function $(id){ return document.getElementById(id); }
+    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if(!user || user.role !== 'kitchen'){ alert('Please sign in as Kitchen'); window.location = 'index.html'; }
+    $('kitchenInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    function loadTickets(){ return JSON.parse(localStorage.getItem('tickets') || '[]'); }
+    function saveTickets(t){ localStorage.setItem('tickets', JSON.stringify(t)); }
+
+    function findTicket(id){ return loadTickets().find(t => t.id === id); }
+
+    function render(){
+      const ticket = findTicket(id);
+      if(!ticket){ $('detailArea').innerHTML = '<div class="small">Ticket not found.</div>'; return; }
+
+      const itemsHtml = ticket.items.map(it => `<div>${it.qty} × ${it.name}${it.modifiers && it.modifiers.length ? '<div class="small">Modifiers: '+it.modifiers.join(', ') +'</div>' : ''}</div>`).join('');
+      $('detailArea').innerHTML = `
+        <b>Table:</b> ${ticket.tableNumber} <div class="small">Submitted: ${new Date(ticket.createdAt).toLocaleString()}</div>
+        <hr>
+        <b>Items:</b><br>${itemsHtml}
+        <hr>
+        <b>Note:</b> ${ticket.note || '-'}<br>
+        <b>Status:</b> <span id="statusText">${ticket.status}</span>
+        <div style="margin-top:12px;">
+          <button id="toCooking">Mark Cooking</button>
+          <button id="toReady">Mark Ready</button>
+          <button id="clearTicket" style="background:#d9534f;color:white;">Clear Ticket</button>
+        </div>
+      `;
+
+      $('toCooking').addEventListener('click', ()=>{
+        const tickets = loadTickets();
+        const idx = tickets.findIndex(t=>t.id===ticket.id);
+        if(idx>=0){ tickets[idx].status = 'In Progress'; saveTickets(tickets); render(); }
+      });
+      $('toReady').addEventListener('click', ()=>{
+        const tickets = loadTickets();
+        const idx = tickets.findIndex(t=>t.id===ticket.id);
+        if(idx>=0){ tickets[idx].status = 'Ready'; saveTickets(tickets); render(); }
+      });
+      $('clearTicket').addEventListener('click', ()=>{
+        let tickets = loadTickets();
+        tickets = tickets.filter(t=>t.id !== ticket.id);
+        saveTickets(tickets);
+        alert('Ticket cleared.');
+        window.location = 'kitchen.html';
+      });
+    }
+
+    $('back').addEventListener('click', ()=> window.location='kitchen.html');
+    $('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
+
+    render();
+  </script>
+</body>
+</html>
