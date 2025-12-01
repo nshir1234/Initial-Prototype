@@ -38,9 +38,10 @@ function getMenu(){ return JSON.parse(localStorage.getItem('MENU')||'[]'); }
 function saveMenu(menu){ localStorage.setItem('MENU', JSON.stringify(menu)); }
 
 function renderMenu(){
+  const menu = getMenu(); // <-- read once
   const area = $('menuArea');
   area.innerHTML='';
-  getMenu().forEach((it, idx)=>{
+  menu.forEach((it, idx)=>{
     const div = document.createElement('div'); div.className='card';
     div.innerHTML = `
       <label>Name: <input type="text" value="${it.name}" id="name${idx}"></label>
@@ -49,14 +50,19 @@ function renderMenu(){
       <button id="save${idx}">Save</button>
     `;
     area.appendChild(div);
+
     document.getElementById(`save${idx}`).addEventListener('click', ()=>{
-      it.name = document.getElementById(`name${idx}`).value;
-      it.price = parseFloat(document.getElementById(`price${idx}`).value) || 0;
-      it.modifiers = document.getElementById(`mods${idx}`).value.split(',').map(s=>s.trim()).filter(Boolean);
-      saveMenu(getMenu());
+      // Update the array
+      menu[idx].name = document.getElementById(`name${idx}`).value;
+      menu[idx].price = parseFloat(document.getElementById(`price${idx}`).value) || 0;
+      menu[idx].modifiers = document.getElementById(`mods${idx}`).value.split(',').map(s=>s.trim()).filter(Boolean);
+      // Save back the updated array
+      saveMenu(menu);
       alert('Menu updated!');
     });
   });
+}
+
 }
 
 // navigation
