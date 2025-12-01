@@ -2,76 +2,68 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Manager — Edit Menu</title>
+<title>Edit Menu Item</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
+body { font-family: Arial, padding:14px; background:#fff; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
+.card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+input { padding:6px; margin:4px 0; width:100%; box-sizing:border-box; }
+button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-right:6px; }
 .small { font-size:0.9em; color:#666; }
-button { padding:6px 8px; border-radius:6px; cursor:pointer; margin-right:6px; }
-input { padding:6px; width:100px; margin-right:6px; }
 </style>
 </head>
 <body>
 <header>
-  <div>
-    <h2>Manager — Edit Menu</h2>
-    <div class="small" id="managerInfo"></div>
-  </div>
+  <div><h2>Edit Menu Item</h2><div class="small" id="managerInfo"></div></div>
   <div>
     <button id="back">Back</button>
     <button id="logout">Logout</button>
   </div>
 </header>
 
-<div id="menuEditList"></div>
+<div class="card" id="editArea">Loading...</div>
 
 <script>
 function $(id){ return document.getElementById(id); }
 
-// enforce manager login
 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
-if(!user || user.role !== 'manager'){
-  alert('Please sign in as Manager');
-  window.location='index.html';
-}
+if(!user || user.role!=='manager'){ alert('Sign in as Manager'); window.location='index.html'; }
 $('managerInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-// load/save menu
-function getMenu(){ return JSON.parse(localStorage.getItem('MENU') || '[]'); }
+const params = new URLSearchParams(window.location.search);
+const id = params.get('id');
+
+function getMenu(){ return JSON.parse(localStorage.getItem('MENU')||'[]'); }
 function saveMenu(menu){ localStorage.setItem('MENU', JSON.stringify(menu)); }
 
-function renderMenuEditor(){
-  const container = $('menuEditList');
-  container.innerHTML = '';
-  getMenu().forEach((it, idx)=>{
-    const div = document.createElement('div');
-    div.className='card';
-    div.innerHTML = `
-      <strong>${it.name}</strong><br>
-      Price: $<input type="number" step="0.01" value="${it.price}" id="price_${idx}" /> <br>
-      Modifiers: <input type="text" value="${it.modifiers.join(', ')}" id="mods_${idx}" /><br>
-      <button id="save_${idx}">Save</button>
-    `;
-    container.appendChild(div);
-    $(`save_${idx}`).addEventListener('click', ()=>{
-      const newPrice = parseFloat($(`price_${idx}`).value);
-      const newMods = $(`mods_${idx}`).value.split(',').map(s=>s.trim()).filter(Boolean);
-      if(isNaN(newPrice) || newPrice<0){ alert('Invalid price'); return; }
-      const menu = getMenu();
-      menu[idx].price = newPrice;
-      menu[idx].modifiers = newMods;
-      saveMenu(menu);
-      alert(`${menu[idx].name} updated.`);
-    });
-  });
+function render(){
+  const menu = getMenu();
+  const item = menu.find(i=>i.id===id);
+  if(!item){ $('editArea').innerHTML='<div class="small">Item not found.</div>'; return; }
+
+  $('editArea').innerHTML=`
+    <label>Name:<input id="name" value="${item.name}"></label>
+    <label>Price:<input id="price" type="number" step="0.01" value="${item.price}"></label>
+    <label>Modifiers (comma separated):<input id="modifiers" value="${item.modifiers.join(', ')}"></label>
+    <div style="margin-top:12px;">
+      <button id="saveBtn">Save</button>
+    </div>
+  `;
+
+  $('saveBtn').onclick=()=>{
+    item.name=$('name').value.trim()||item.name;
+    item.price=parseFloat($('price').value)||item.price;
+    item.modifiers=$('modifiers').value.split(',').map(s=>s.trim()).filter(Boolean);
+    saveMenu(menu);
+    alert('Menu item saved!');
+  };
 }
 
-$('back').addEventListener('click', ()=>window.location='menu.html');
-$('logout').addEventListener('click', ()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
+$('back').addEventListener('click', ()=> window.location='menu.html');
+$('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
 
-renderMenuEditor();
+render();
 </script>
 </body>
 </html>
