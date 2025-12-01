@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Menu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+body { font-family: Arial; padding: 20px; text-align:center; }
+button { padding:10px; margin:6px; font-size:16px; }
+.card { border:1px solid #ccc; padding:15px; border-radius:8px; margin:10px; }
+</style>
+
+</head>
+<body>
+
+<h2>Menu</h2>
+
+<div id="menuArea" class="card">
+  <p>Sample Menu Item</p>
+  <p>$9.99</p>
+</div>
+
+<button id="goAdmin">Edit Menu</button>
+<br><br>
+
+<button id="goBack">Back</button>
+<button id="logout">Logout</button>
+
+<script>
+document.getElementById("goAdmin").addEventListener("click", () => {
+  window.location = "menu_admin.html";
+});
+
+document.getElementById("goBack").addEventListener("click", () => {
+  window.location = "index.html";
+});
+
+document.getElementById("logout").addEventListener("click", () => {
+  localStorage.removeItem("currentUser");
+  window.location = "index.html";
+});
+</script>
+
+</body>
+</html>
