@@ -37,6 +37,7 @@
       const n = nameInput.value.trim() || 'Kitchen';
       localStorage.setItem('currentUser', JSON.stringify({ role:'kitchen', name: n }));
       window.location = 'kitchen.html';
+    });
     document.getElementById("goMenu").addEventListener("click", () => {
       window.location = "menu.html";
     });
