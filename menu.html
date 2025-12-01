@@ -2,51 +2,60 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Menu Viewer</title>
+<title>Manager — Menu Viewer</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <style>
-body { font-family: Arial, padding:14px; background:#fff; }
+body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
 header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.card { background:#fafafa; border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
-.small { font-size:0.9em; color:#666; }
+.panel { border-radius:8px; padding:12px; box-shadow:0 1px 6px rgba(0,0,0,0.06); background:#fafafa; }
 button { padding:8px 10px; border-radius:6px; cursor:pointer; margin-left:6px; }
+.small { font-size:0.9em; color:#666; }
 </style>
 </head>
 <body>
 <header>
-  <div><h2>Menu Viewer</h2><div class="small" id="managerInfo"></div></div>
   <div>
+    <h2>Menu Viewer</h2>
+    <div class="small" id="userInfo"></div>
+  </div>
+  <div>
+    <button id="editMenu">Edit Menu</button>
     <button id="back">Back</button>
     <button id="logout">Logout</button>
   </div>
 </header>
 
-<div id="menuArea"></div>
+<div class="panel" id="menuList">Loading menu...</div>
 
 <script>
 function $(id){ return document.getElementById(id); }
-
 const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
-if(!user || user.role!=='manager'){ alert('Sign in as Manager'); window.location='index.html'; }
-$('managerInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
+if(!user || user.role !== 'manager'){ alert('Please sign in as Manager'); window.location='index.html'; }
+$('userInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-function getMenu(){ return JSON.parse(localStorage.getItem('MENU')||'[]'); }
+if(!localStorage.getItem('MENU')){
+  const defaultMenu = [
+    { id:'m1', name:'Caesar Salad', price:8.50, modifiers:['No Dressing','Extra Dressing'] },
+    { id:'m2', name:'Cheeseburger', price:11.00, modifiers:['Well-Done','No Onions','Add Bacon'] },
+    { id:'m3', name:'Margherita Pizza', price:12.50, modifiers:['Extra Cheese','No Basil','Gluten-Free'] },
+    { id:'m4', name:'Fries', price:4.0, modifiers:['No Salt','Extra Crispy'] }
+  ];
+  localStorage.setItem('MENU', JSON.stringify(defaultMenu));
+}
 
 function renderMenu(){
-  const area = $('menuArea');
-  area.innerHTML='';
-  getMenu().forEach(it=>{
+  const menu = JSON.parse(localStorage.getItem('MENU'));
+  const container = $('menuList');
+  container.innerHTML = '';
+  menu.forEach(it=>{
     const div = document.createElement('div');
-    div.className='card';
-    div.innerHTML=`<strong>${it.name}</strong> - $${it.price.toFixed(2)}<br><span class="small">Modifiers: ${it.modifiers.join(', ')}</span>`;
-    const editBtn = document.createElement('button');
-    editBtn.innerText='Edit';
-    editBtn.onclick=()=> window.location=`menu_admin.html?id=${it.id}`;
-    div.appendChild(editBtn);
-    area.appendChild(div);
+    div.style.marginBottom = '8px';
+    div.innerHTML = `<strong>${it.name}</strong> — $${it.price.toFixed(2)}<div class="small">Modifiers: ${it.modifiers.join(', ')}</div>`;
+    container.appendChild(div);
   });
 }
 
+$('editMenu').addEventListener('click', ()=> window.location='menu_admin.html');
 $('back').addEventListener('click', ()=> window.location='index.html');
 $('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
 
