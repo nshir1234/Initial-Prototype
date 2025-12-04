@@ -33,7 +33,7 @@ const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
 if(!user || user.role !== 'manager'){ alert('Please sign in as Manager'); window.location='index.html'; }
 $('userInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-function getMenu(){ return JSON.parse(localStorage.getItem('MENU')); }
+function getMenu(){ return JSON.parse(localStorage.getItem('MENU') || '[]'); }
 function saveMenu(menu){ localStorage.setItem('MENU', JSON.stringify(menu)); }
 
 function renderMenu(){
