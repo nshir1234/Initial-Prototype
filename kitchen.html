@@ -1,97 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Kitchen — Ticket Board</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
-    header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-    .board { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-    .column { background:#fafafa; border-radius:8px; padding:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); min-height:200px; }
-    .ticket { border-radius:6px; padding:8px; margin-bottom:10px; background:white; box-shadow:0 1px 6px rgba(0,0,0,0.04); }
-    .small { font-size:0.9em; color:#666; }
-    button { padding:6px 8px; border-radius:6px; cursor:pointer; margin-top:6px; }
-  </style>
+<meta charset="utf-8" />
+<title>Kitchen — Ticket Board</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+body { font-family: Arial, sans-serif; padding:14px; background:#fff; }
+header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.board { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.column { background:#fafafa; border-radius:8px; padding:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); min-height:200px; }
+.ticket { border-radius:6px; padding:8px; margin-bottom:10px; background:white; box-shadow:0 1px 6px rgba(0,0,0,0.04); }
+.small { font-size:0.9em; color:#666; }
+button { padding:6px 8px; border-radius:6px; cursor:pointer; margin-top:6px; }
+</style>
 </head>
 <body>
-  <header>
-    <div>
-      <h2>Kitchen Ticket Board</h2>
-      <div class="small" id="kitchenInfo"></div>
-    </div>
-    <div>
-      <button id="goServer">Open Server App</button>
-      <button id="logout">Logout</button>
-    </div>
-  </header>
+<header>
+<div>
+<h2>Kitchen Ticket Board</h2>
+<div class="small" id="kitchenInfo"></div>
+</div>
+<div>
+<button id="goServer">Open Server App</button>
+<button id="logout">Logout</button>
+</div>
+</header>
 
-  <div>
-    <div class="small">Tickets are ordered by submission time. Click action to advance status.</div>
-  </div>
 
-  <div style="margin-top:10px;" class="board">
-    <div class="column" id="colNew"><h4>New</h4></div>
-    <div class="column" id="colInProgress"><h4>In Progress</h4></div>
-    <div class="column" id="colReady"><h4>Ready</h4></div>
-  </div>
+<div>
+<div class="small">Tickets are ordered by submission time. Click action to advance status.</div>
+</div>
 
-  <script>
-    function $(id){ return document.getElementById(id); }
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{"role":"kitchen","name":"Kitchen"}');
-    $('kitchenInfo').innerText = `Logged in as: ${user.name} (Role: ${user.role})`;
 
-    function loadTickets(){
-      const tickets = JSON.parse(localStorage.getItem('tickets') || '[]');
-      return tickets.sort((a,b)=> new Date(a.createdAt) - new Date(b.createdAt));
-    }
-
-    function saveTickets(tickets){
-      localStorage.setItem('tickets', JSON.stringify(tickets));
-    }
-
-    function renderBoard(){
-      const tickets = loadTickets();
-      $('colNew').innerHTML = '<h4>New</h4>';
-      $('colInProgress').innerHTML = '<h4>In Progress</h4>';
-      $('colReady').innerHTML = '<h4>Ready</h4>';
-      tickets.forEach(t => {
-        const div = document.createElement('div'); div.className='ticket';
-        div.innerHTML = `<strong>Table ${t.tableNumber}</strong> <div class="small">Server: ${t.serverName} • ${new Date(t.createdAt).toLocaleTimeString()}</div>
-          <div style="margin-top:6px;">${t.items.map(it=>`${it.qty}× ${it.name}${it.modifiers && it.modifiers.length ? ' ('+it.modifiers.join(', ')+')' : ''}`).join('<br>')}</div>
-          <div class="small" style="margin-top:6px;">Note: ${t.note || '-'}</div>
-        `;
-        const action = document.createElement('button');
-        if(t.status === 'New'){ action.innerText='Start'; action.onclick = ()=> changeStatus(t.id,'In Progress'); $('colNew').appendChild(div); div.appendChild(action); }
-        else if(t.status === 'In Progress'){ action.innerText='Mark Ready'; action.onclick = ()=> changeStatus(t.id,'Ready'); $('colInProgress').appendChild(div); div.appendChild(action); }
-        else { action.innerText='Done (Clear)'; action.onclick = ()=> clearTicket(t.id); $('colReady').appendChild(div); div.appendChild(action); }
-      });
-      // place empty message when none
-      if(!loadTickets().some(t=>t.status==='New')) $('colNew').insertAdjacentHTML('beforeend','<div class="small">No new tickets.</div>');
-      if(!loadTickets().some(t=>t.status==='In Progress')) $('colInProgress').insertAdjacentHTML('beforeend','<div class="small">No tickets in progress.</div>');
-      if(!loadTickets().some(t=>t.status==='Ready')) $('colReady').insertAdjacentHTML('beforeend','<div class="small">No ready tickets.</div>');
-    }
-
-    function changeStatus(id, newStatus){
-      const tickets = loadTickets();
-      const idx = tickets.findIndex(t=>t.id===id);
-      if(idx>=0){ tickets[idx].status = newStatus; saveTickets(tickets); renderBoard(); }
-    }
-    function clearTicket(id){
-      let tickets = loadTickets();
-      tickets = tickets.filter(t=>t.id!==id);
-      saveTickets(tickets);
-      renderBoard();
-    }
-
-    $('goServer').addEventListener('click', ()=> window.location='server.html');
-    $('logout').addEventListener('click', ()=> { localStorage.removeItem('currentUser'); window.location='index.html'; });
-
-    // initial render
-    renderBoard();
-
-    // Also refresh periodically so server → kitchen updates are picked up after submissions
-    setInterval(renderBoard, 2000);
-  </script>
-</body>
-</html>
+<div style="margin-top:10px;" class="board">
+<div class="column" id="colNew"><h4>New</h4></div>
+<div class="column" id="colInProgress"><h4>In Progress</h4></div>
+<div class="column" id="colReady"><h4>Ready</h4>
