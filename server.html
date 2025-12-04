@@ -29,7 +29,6 @@ input[type="text"]{ padding:6px; width:60%; }
   </div>
   <div>
     <button id="goKitchen">Open Kitchen Board</button>
-    <button id="goMenu">Manage Menu</button>
     <button id="logout">Logout</button>
   </div>
 </header>
@@ -169,7 +168,6 @@ function submitTicket(){
 
 // navigation
 $('goKitchen').addEventListener('click',()=>window.location='kitchen.html');
-$('goMenu').addEventListener('click',()=>window.location='menu.html');
 $('logout').addEventListener('click',()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
 
 // init
