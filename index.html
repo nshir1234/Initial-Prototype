@@ -1,53 +1,94 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Demo — Restaurant Ordering</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<style>
-body { font-family: Arial, sans-serif; display:flex; min-height:100vh; align-items:center; justify-content:center; background:#f4f4f6; }
-.card { background:white; padding:24px; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.06); width:340px; text-align:center; }
-button { padding:10px 14px; margin:8px; border-radius:6px; border:1px solid #ccc; cursor:pointer; }
-input { padding:8px; width:100%; margin-top:10px; box-sizing:border-box; }
-</style>
-</head>
-<body>
-<div class="card">
-<h2>Restaurant Ordering — Demo</h2>
-<p>Choose a role to start (demo).</p>
-<label><input id="name" placeholder="Enter your name" /></label>
-<div style="margin-top:12px">
-<button id="serverBtn">Sign in as Server</button>
-<button id="kitchenBtn">Sign in as Kitchen</button>
-<button id="managerBtn">Manager</button>
-</div>
-<p style="font-size:0.85em;color:#666;margin-top:12px;">This demo saves tickets locally in your browser.</p>
-</div>
+right.appendChild(edit);
+right.appendChild(rm);
 
 
-<script>
-const nameInput = document.getElementById('name');
-
-
-document.getElementById('serverBtn').addEventListener('click', () => {
-const n = nameInput.value.trim() || 'Server';
-localStorage.setItem('currentUser', JSON.stringify({ role:'server', name: n }));
-window.location = 'server.html';
+li.appendChild(left);
+li.appendChild(right);
+ul.appendChild(li);
 });
 
 
-document.getElementById('kitchenBtn').addEventListener('click', () => {
-const n = nameInput.value.trim() || 'Kitchen';
-localStorage.setItem('currentUser', JSON.stringify({ role:'kitchen', name: n }));
-window.location = 'kitchen.html';
-});
+if(state.orderItems.length === 0){
+ul.innerHTML = '<li>No items added.</li>';
+}
+}
 
 
-document.getElementById('managerBtn').addEventListener('click', () => {
-const n = nameInput.value.trim() || 'Manager';
-localStorage.setItem('currentUser', JSON.stringify({ role:'manager', name: n }));
-window.location = 'menu.html';
-});
+function addItem(menuItem){
+const qty = parseInt(prompt('Quantity', '1')||'1',10);
+if(qty <= 0){ alert('Quantity must be >=1'); return; }
+
+
+let modifiers = [];
+if(menuItem.modifiers?.length){
+const pick = prompt('Modifiers (comma separated) available:
+' + menuItem.modifiers.join(', '), '');
+if(pick) modifiers = pick.split(',').map(s=>s.trim()).filter(Boolean);
+}
+
+
+state.orderItems.push({ itemId: menuItem.id, name: menuItem.name, qty, modifiers });
+renderOrder();
+}
+
+
+function editItem(idx){
+const it = state.orderItems[idx];
+const newQty = parseInt(prompt('Quantity', it.qty),10);
+if(newQty > 0) it.qty = newQty;
+
+
+const newMods = prompt('Modifiers (comma separated)', (it.modifiers||[]).join(','));
+it.modifiers = newMods ? newMods.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
+
+renderOrder();
+}
+
+
+function submitTicket(){
+const tableNumber = parseInt($('tableNumber').value,10);
+if(!tableNumber){ alert('Enter table number.'); return; }
+if(state.orderItems.length === 0){ alert('Add at least one item before submitting.'); return; }
+
+
+const note = $('orderNote').value||'';
+
+
+const ticket = {
+id:'t_'+Date.now(),
+tableNumber,
+serverName:user.name,
+items:JSON.parse(JSON.stringify(state.orderItems)),
+note,
+status:'New',
+createdAt:new Date().toISOString()
+};
+
+
+const tickets = JSON.parse(localStorage.getItem('tickets')||'[]');
+tickets.push(ticket);
+localStorage.setItem('tickets', JSON.stringify(tickets));
+
+
+state.orderItems=[];
+renderOrder();
+$('orderNote').value='';
+
+
+$('msg').innerText = `Ticket submitted for Table ${tableNumber} (ID: ${ticket.id}).`;
+}
+
+
+$('goKitchen').addEventListener('click',()=>window.location='kitchen.html');
+$('goMenu').addEventListener('click',()=>window.location='menu.html');
+$('logout').addEventListener('click',()=>{ localStorage.removeItem('currentUser'); window.location='index.html'; });
+$('submitOrder').addEventListener('click', submitTicket);
+
+
+renderMenu();
+renderOrder();
 </script>
 </body>
 </html>
